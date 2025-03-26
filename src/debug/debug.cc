@@ -1159,16 +1159,15 @@ Debug::SettleSyslog()
 void
 _db_rotate_log(void)
 {
-    if (!TheLog.name)
-        return;
+if (!TheLog.name)
+    return;
 
 #ifdef S_ISREG
-    struct stat sb;
-    if (stat(TheLog.name, &sb) == 0)
-        if (S_ISREG(sb.st_mode) == 0)
-            return;
+struct stat sb;
+if (stat(TheLog.name, &sb) == 0)
+    if (S_ISREG(sb.st_mode) == 0)
+        return;
 #endif
-
     char from[MAXPATHLEN];
     from[0] = '\0';
 
@@ -1214,12 +1213,17 @@ _db_rotate_log(void)
         if (rename(from, to) == -1) {
             const auto saved_errno = errno;
             debugs(0, DBG_IMPORTANT, "ERROR: renaming file " << from << " to "
-                   << to << "failed: " << xstrerr(saved_errno));
+                                                             << to << "failed: " << xstrerr(saved_errno));
         }
     }
 
     // Close (if we have not already) and reopen the log because
     // it may have been renamed "manually" before HUP'ing us.
+    debugOpenLog(Debug::cache_log);
+}
+void _db_reopen_logs(void) {
+    if (!TheLog.name)
+        return;
     debugOpenLog(Debug::cache_log);
 }
 

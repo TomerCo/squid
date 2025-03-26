@@ -19,6 +19,7 @@
 #include "log/ModDaemon.h"
 #include "SquidConfig.h"
 #include "SquidIpc.h"
+#include "tools.h"
 
 #include <cerrno>
 
@@ -273,7 +274,7 @@ logfile_mod_daemon_rotate(Logfile * lf, const int16_t)
 {
     char tb[3];
     debugs(50, DBG_IMPORTANT, "logfileRotate: " << lf->path);
-    tb[0] = 'R';
+    tb[0] = IamMasterProcess() ? 'R' : 'O';
     tb[1] = '\n';
     tb[2] = '\0';
     logfile_mod_daemon_append(lf, tb, 2);

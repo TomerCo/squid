@@ -1008,7 +1008,11 @@ mainRotate(void)
 #endif
     externalAclShutdown();
 
-    _db_rotate_log();       /* cache.log */
+    if(IamMasterProcess()) {
+        _db_rotate_log();       /* cache.log */
+    } else {
+        _db_reopen_logs();
+    }
     storeDirWriteCleanLogs(1);
     storeLogRotate();       /* store.log */
     accessLogRotate();      /* access.log */

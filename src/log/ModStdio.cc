@@ -17,7 +17,7 @@
 #include "log/File.h"
 #include "log/ModStdio.h"
 #include "SquidConfig.h"
-
+#include "tools.h"
 #include <cerrno>
 
 typedef struct {
@@ -121,28 +121,29 @@ logfile_mod_stdio_rotate(Logfile * lf, const int16_t nRotate)
     debugs(0, DBG_IMPORTANT, "Rotate log file " << lf->path);
 
     SBuf basePath(realpath);
-
-    /* Rotate numbers 0 through N up one */
-    for (int16_t i = nRotate; i > 1;) {
-        --i;
-        SBuf from(basePath);
-        from.appendf(".%d", i-1);
-        SBuf to(basePath);
-        to.appendf(".%d", i);
-        FileRename(from, to);
-        // TODO handle rename errors
-    }
-
     /* Rotate the current log to .0 */
     logfileFlush(lf);
 
     file_close(ll->fd);     /* always close */
+    if(IamMasterProcess()) {
+        /* Rotate numbers 0 through N up one */
+        for (int16_t i = nRotate; i > 1;) {
+            --i;
+            SBuf from(basePath);
+            from.appendf(".%d", i - 1);
+            SBuf to(basePath);
+            to.appendf(".%d", i);
+            FileRename(from, to);
+            // TODO handle rename errors
+        }
 
-    if (nRotate > 0) {
-        SBuf to(basePath);
-        to.appendf(".0");
-        FileRename(basePath, to);
-        // TODO handle rename errors
+
+        if (nRotate > 0) {
+            SBuf to(basePath);
+            to.appendf(".0");
+            FileRename(basePath, to);
+            // TODO handle rename errors
+        }
     }
     /* Reopen the log.  It may have been renamed "manually" */
     ll->fd = file_open(realpath, O_WRONLY | O_CREAT | O_TEXT);

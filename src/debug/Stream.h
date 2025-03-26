@@ -227,6 +227,7 @@ inline std::ostream& operator <<(std::ostream &os, const uint8_t d)
 
 /* Legacy debug function definitions */
 void _db_rotate_log(void);
+void _db_reopen_logs(void);
 
 #endif /* SQUID_SRC_DEBUG_STREAM_H */
 
